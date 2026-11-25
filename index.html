@@ -4,50 +4,96 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>India Market Bias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
-  <header>
-    <h1>India Market Bias <span>v1 · data-driven</span></h1>
-    <div id="status"></div>
-  </header>
-  <main>
-    <section>
-      <h2>Bias matrix</h2>
-      <div class="scroll"><table id="matrix"></table></div>
-      <div id="detail" class="card muted">Click any cell to see exactly what drives it.</div>
-    </section>
-    <section>
-      <h2>Global COT drivers <small>CFTC · weekly · commercials net</small></h2>
-      <div class="scroll"><table id="cotTable"></table></div>
+<header class="top">
+  <div class="brand"><span class="logo">◆</span> India Market Bias</div>
+  <nav>
+    <a href="#today">Today</a><a href="#bias">Bias</a><a href="#global">Global money</a>
+    <a href="#india">FII vs Retail</a><a href="#chart">Price map</a><a href="#guide">How to read</a>
+  </nav>
+  <div id="updated" class="pill"></div>
+</header>
+
+<main>
+  <section id="today">
+    <div class="tabs" id="instTabs"></div>
+    <div id="story"></div>
+  </section>
+
+  <section id="bias">
+    <div class="sec-head"><h2>Bias at a glance</h2>
+      <p>Each cell is a vote count. Bigger bar = more votes agree. Click a cell to see every vote in plain English.</p></div>
+    <div class="bwrap"><div id="biasGrid"></div></div>
+    <div id="votes" class="card hidden"></div>
+  </section>
+
+  <section id="global">
+    <div class="sec-head"><h2>Global money flow</h2>
+      <p>What hedgers (ICT's "smart money" / Commercials) are doing in markets that move Indian stocks. Updated weekly from the CFTC.</p></div>
+    <div id="cotCards" class="grid3"></div>
+    <div class="card">
       <div class="row">
         <select id="cotSel"></select>
-        <select id="cotLb"><option>26</option><option selected>52</option><option>156</option></select>
-        <span class="legend"><b class="red">■ Commercials</b> <b class="green">■ Large specs</b> <b class="blue">■ Small specs</b></span>
+        <select id="cotLb"><option value="26">26-week range</option><option value="52" selected>52-week range</option><option value="156">3-year range</option></select>
+        <div class="legend"><span><i style="background:#ef4444"></i>Commercials (smart money)</span><span><i style="background:#22c55e"></i>Large specs (funds)</span><span><i style="background:#3b82f6"></i>Small specs (retail)</span></div>
       </div>
       <div id="cotNet" class="chart"></div>
       <div id="cotIdx" class="chart small"></div>
-    </section>
-    <section>
-      <h2>NSE participant OI <small>daily · net contracts</small></h2>
+    </div>
+    <details class="howto"><summary>How to read this</summary>
+      <p>Top chart: net positions. Above zero = net long, below = net short. Commercials usually move opposite to large speculators.</p>
+      <p>Bottom chart: the COT Index - where today's commercial position sits in its range. Above 80 = near their most bullish, below 20 = near their most bearish. An extreme is a warning, not an entry: ICT waits for price to run liquidity (take out equal highs or lows) before acting on it.</p>
+    </details>
+  </section>
+
+  <section id="india">
+    <div class="sec-head"><h2>FII vs Retail in Indian F&amp;O</h2>
+      <p>NSE participant-wise open interest - India's daily version of the COT report.</p></div>
+    <div id="poiCards" class="grid4"></div>
+    <div class="card">
       <div class="row">
-        <select id="poiSeg">
-          <option value="fut">Index futures net</option>
-          <option value="opt">Index options directional net</option>
-        </select>
-        <span class="legend"><b style="color:#f59e0b">■ FII</b> <b style="color:#a855f7">■ DII</b> <b class="blue">■ Client</b> <b class="green">■ Pro</b> <b>— Nifty (left)</b></span>
+        <select id="poiSeg"><option value="fut">Index futures (net)</option><option value="opt">Index options (directional net)</option></select>
+        <div class="legend"><span><i style="background:#f59e0b"></i>FII</span><span><i style="background:#a855f7"></i>DII</span><span><i style="background:#3b82f6"></i>Client</span><span><i style="background:#22c55e"></i>Pro</span><span><i style="background:#e2e8f0"></i>Nifty (left axis)</span></div>
       </div>
       <div id="poiChart" class="chart"></div>
-    </section>
-    <section>
-      <h2>Price &amp; previous ranges</h2>
-      <div class="row"><select id="pxSel"></select>
-        <span class="legend">PW / PM / PQ = previous week / month / quarter high &amp; low</span></div>
+    </div>
+    <details class="howto"><summary>How to read this</summary>
+      <p>Healthy rally: FIIs covering shorts or adding longs while retail sells. Suspicious rally: price rising while FIIs add shorts. The mirror image applies to declines.</p>
+      <p>Options line = (calls bought - calls sold) - (puts bought - puts sold). Positive = net bullish option exposure.</p>
+    </details>
+  </section>
+
+  <section id="chart">
+    <div class="sec-head"><h2>Price map</h2>
+      <p>Dashed lines = previous week (PW), month (PM) and quarter (PQ) highs and lows - the liquidity pools ICT watches.</p></div>
+    <div class="card">
+      <div class="row"><select id="pxSel"></select></div>
       <div id="pxChart" class="chart tall"></div>
-    </section>
-  </main>
-  <footer>Positioning context only, not trading advice. Data: CFTC, NSE, Yahoo Finance.</footer>
-  <script src="app.js"></script>
+    </div>
+  </section>
+
+  <section id="guide">
+    <div class="sec-head"><h2>How to read the dashboard</h2><p>A top-down routine in four steps.</p></div>
+    <div class="guide">
+      <div class="card"><b class="n">1</b><h3>Start from the top</h3><p>Yearly and Quarterly show the big draw on liquidity. Take Monthly and Weekly trades in that direction; treat counter-trend ideas as quick trades only.</p></div>
+      <div class="card"><b class="n">2</b><h3>Check global money</h3><p>Hedgers short the dollar and long US bonds = tailwind for Nifty. Hedgers long crude = pressure on the rupee. Your old DXY + yields check, automated.</p></div>
+      <div class="card"><b class="n">3</b><h3>Check who is driving</h3><p>Is the move led by FIIs (real) or retail (fragile)? FII flips across zero are transitions, not instant signals.</p></div>
+      <div class="card"><b class="n">4</b><h3>Use the levels</h3><p>"What's next" gives the target liquidity and the invalidation level. Wait for your ICT entry model at those levels; Daily bias is session context only.</p></div>
+    </div>
+    <div class="card keys">
+      <span><b class="bull-t">▲ Bullish</b> majority of votes up</span>
+      <span><b class="bear-t">▼ Bearish</b> majority of votes down</span>
+      <span><b class="neu-t">◆ Neutral</b> votes mixed - no edge</span>
+      <span><b>80 / 20</b> extreme readings</span>
+    </div>
+  </section>
+</main>
+<footer>Positioning context only - not trading advice. Data: CFTC, NSE, Yahoo Finance.</footer>
+<script src="app.js"></script>
 </body>
 </html>
