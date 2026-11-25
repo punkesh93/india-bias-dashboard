@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #020617; color: #e2e8f0; font: 14px/1.5 system-ui, sans-serif; }
+header { padding: 16px 20px; border-bottom: 1px solid #1e293b; }
+h1 { margin: 0 0 6px; font-size: 20px; }
+h1 span { color: #64748b; font-size: 13px; font-weight: 400; }
+h2 { font-size: 16px; margin: 0 0 10px; }
+h2 small { color: #64748b; font-weight: 400; margin-left: 6px; }
+h3 { font-size: 14px; margin: 0 0 8px; }
+main { padding: 16px 20px; display: grid; gap: 28px; max-width: 1300px; margin: auto; }
+#status { display: flex; flex-wrap: wrap; gap: 14px; color: #94a3b8; font-size: 12px; }
+#status .warn { color: #f87171; }
+table { border-collapse: collapse; width: 100%; }
+th, td { padding: 6px 10px; border-bottom: 1px solid #1e293b; text-align: left; white-space: nowrap; }
+th { color: #94a3b8; font-weight: 500; }
+.scroll { overflow-x: auto; }
+#matrix td.cell { cursor: pointer; color: #fff; font-weight: 600; text-align: center; border: 2px solid #020617; }
+#matrix td.cell small { display: block; font-weight: 400; opacity: .8; }
+#matrix td.cell:hover { filter: brightness(1.2); }
+.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; margin-top: 12px; }
+.muted { color: #64748b; }
+.pad { padding: 16px; }
+.sig { font-size: 16px; text-align: center; }
+.s1 { color: #22c55e; } .s-1 { color: #ef4444; } .s0 { color: #64748b; }
+td.hi { color: #22c55e; font-weight: 700; } td.lo { color: #ef4444; font-weight: 700; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 8px; }
+select { background: #0f172a; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 6px 8px; }
+.legend { color: #94a3b8; font-size: 12px; }
+.red { color: #ef4444; } .green { color: #22c55e; } .blue { color: #3b82f6; }
+.chart { height: 340px; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
+.chart.small { height: 160px; margin-top: 8px; }
+.chart.tall { height: 460px; }
+footer { padding: 20px; color: #64748b; font-size: 12px; text-align: center; }
