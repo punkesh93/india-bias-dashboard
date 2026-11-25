@@ -6,7 +6,7 @@ import yfinance as yf
 from common import load, now_ist, save
 
 TICKERS = {
-    "NIFTY": "^NSEI", "SENSEX": "^BSESN", "BANKNIFTY": "^NSEBANK",
+    "NIFTY": "^NSEI", "SENSEX": "^BSESN", "BANKNIFTY": "^NSEBANK", "FINNIFTY": "NIFTY_FIN_SERVICE.NS",
     "USDINR": "INR=X", "INDIAVIX": "^INDIAVIX",
     "DXY": "DX-Y.NYB", "US10Y": "^TNX",
 }

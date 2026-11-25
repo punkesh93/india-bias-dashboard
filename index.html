@@ -7,13 +7,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ict.css">
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 <header class="top">
   <div class="brand"><span class="logo">◆</span> India Market Bias</div>
   <nav>
-    <a href="#today">Today</a><a href="#bias">Bias</a><a href="#global">Global money</a>
+    <a href="#today">Today</a><a href="#ict">ICT map</a><a href="#bias">Bias</a><a href="#global">Global money</a>
     <a href="#india">FII vs Retail</a><a href="#chart">Price map</a><a href="#guide">How to read</a>
   </nav>
   <div id="updated" class="pill"></div>
@@ -24,6 +25,8 @@
     <div class="tabs" id="instTabs"></div>
     <div id="story"></div>
   </section>
+
+  <section id="ict"></section>
 
   <section id="bias">
     <div class="sec-head"><h2>Bias at a glance</h2>
@@ -95,5 +98,6 @@
 </main>
 <footer>Positioning context only - not trading advice. Data: CFTC, NSE, Yahoo Finance.</footer>
 <script src="app.js"></script>
+<script src="ict.js"></script>
 </body>
 </html>

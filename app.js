@@ -11,7 +11,7 @@ const ROLE = {
   DII: "Mutual funds & insurers - mostly hedging their stock holdings.",
 };
 const D = {};
-let current = "NIFTY";
+let current = "SENSEX";
 let drawPrice = null;
 
 async function load(path) {

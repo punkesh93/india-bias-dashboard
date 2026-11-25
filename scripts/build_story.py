@@ -4,7 +4,7 @@ import pandas as pd
 from build_bias import poi_series, price_df
 from common import load, now_ist, save
 
-EQUITIES = {"NIFTY": "Nifty", "SENSEX": "Sensex", "BANKNIFTY": "Bank Nifty"}
+EQUITIES = {"SENSEX": "Sensex", "NIFTY": "Nifty", "BANKNIFTY": "Bank Nifty"}
 WEIGHTS = {"Yearly": 1, "Quarterly": 1.5, "Monthly": 2, "Weekly": 2, "Daily": 1}
 WHAT = {
     "DXY": "a stronger US dollar",

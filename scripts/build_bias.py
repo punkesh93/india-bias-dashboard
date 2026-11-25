@@ -7,7 +7,7 @@ TIMEFRAMES = ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily"]
 RESAMPLE = {"Yearly": "YE", "Quarterly": "QE", "Monthly": "ME", "Weekly": "W-FRI"}
 COT_LOOKBACK = {"Yearly": "156", "Quarterly": "52", "Monthly": "26"}
 DRIVERS = ["DXY", "UST10Y", "MSCIEM", "CRUDE", "NASDAQ"]
-INSTRUMENTS = ["NIFTY", "SENSEX", "BANKNIFTY", "USDINR"]
+INSTRUMENTS = ["SENSEX", "NIFTY", "BANKNIFTY", "USDINR"]
 HI, LO = 80, 20
 
 
