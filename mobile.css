@@ -1,0 +1,89 @@
+/* ---------- Mobile optimisation ---------- */
+* { -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+.mnav { display: none; }
+
+@media (max-width: 880px) {
+  body { font-size: 15px; padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .top { padding: 10px 14px; gap: 10px; }
+  .top nav { display: none; }
+  .brand { font-size: 15px; flex: 1; }
+  .pill { font-size: 11px; }
+  main { padding: 16px 12px; gap: 36px; }
+  section { scroll-margin-top: 60px; }
+  .sec-head h2 { font-size: 19px; }
+  .sec-head p { font-size: 13px; margin-bottom: 12px; }
+  .card { padding: 14px; border-radius: 14px; }
+
+  /* tabs scroll sideways */
+  .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+          margin: 0 -12px 12px; padding: 0 12px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { flex: 0 0 auto; padding: 8px 14px; }
+
+  /* hero / story */
+  .hero h1 { font-size: 17px; }
+  .hero-head { flex-direction: column; gap: 12px; }
+  .verdict { width: 100%; justify-content: center; font-size: 16px; padding: 10px; }
+  .story3, .split, .kv, .ict-grid { grid-template-columns: 1fr; }
+  .col { padding: 12px; }
+  li { margin: 6px 0; }
+
+  /* controls */
+  select { font-size: 16px; width: 100%; }
+  .row { gap: 8px; }
+  .legend { gap: 10px; font-size: 11px; }
+
+  /* charts */
+  .chart { height: 260px; }
+  .chart.small { height: 120px; }
+  .chart.tall { height: 320px; }
+
+  /* card grids */
+  .grid3 { grid-template-columns: 1fr; }
+  .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .pcard .big { font-size: 20px; }
+  .pcard p { font-size: 12px; }
+  .chg { gap: 8px; font-size: 11px; }
+
+  /* bias grid -> one row of 5 labelled tiles per index */
+  .bwrap { overflow: visible; }
+  .bgrid { min-width: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .bgrid > div:first-child, .bh { display: none; }
+  .bname { grid-column: 1 / -1; margin-top: 10px; font-size: 15px; }
+  .bcell { padding: 8px 5px; gap: 4px; border-radius: 10px; text-align: center; }
+  .bcell::before { content: attr(data-t); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .bl { font-size: 12px; }
+  .bs { font-size: 10px; }
+  .vote { grid-template-columns: 1fr; gap: 2px; }
+
+  /* tables */
+  table { font-size: 13px; }
+  .levels td, .ladder td, .smt td { padding: 8px 4px; }
+  .smt td.wrap { min-width: 200px; }
+  details.howto { padding: 12px; }
+
+  /* ICT map */
+  .cycle { gap: 6px; }
+  .cycle span { font-size: 11px; padding: 5px 9px; }
+  .kv-i b { font-size: 16px; }
+  .rng-h { flex-direction: column; gap: 2px; }
+  .guide { grid-template-columns: 1fr; }
+  .keys { gap: 12px; }
+
+  /* bottom tab bar */
+  .mnav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+          background: rgba(7,11,20,.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .mnav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted);
+            text-decoration: none; font-size: 11px; padding: 6px 0; border-radius: 10px; }
+  .mnav a b { font-size: 17px; line-height: 1; font-weight: 400; }
+  .mnav a.on { color: var(--accent); background: rgba(124,156,255,.12); }
+}
+
+@media (max-width: 380px) {
+  .bl { font-size: 11px; }
+  .bs { display: none; }
+  .bgrid { gap: 4px; }
+  .grid4 { grid-template-columns: 1fr; }
+}
