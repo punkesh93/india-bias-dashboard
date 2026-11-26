@@ -416,7 +416,7 @@ def draw_on_liquidity(close, sd, sw, ev, above, below, fv, obs, rngs, smt_b):
     k = (last["kind"], last["side"]) if last else None
     out = {"direction": direction, "reasons": reasons}
     if direction == "bullish":
-        tgt = next((p for p in above[:3] if p["equal"]), above[0] if above else None)
+        tgt = above[0] if above else None  # nearest ERL first
         ent = zone("bullish", True) or (eq_level if r40["eq"] < close else None)
         sl = sd.get("swing_low")
         inv = ({"name": f"Daily swing low ({sd.get('swing_low_date')})", "price": sl, "dist": pct(sl, close)}
@@ -439,7 +439,7 @@ def draw_on_liquidity(close, sd, sw, ev, above, below, fv, obs, rngs, smt_b):
         out.update(target=tgt, entry=ent, invalidation=inv, stage_idx=idx, stage=stage, headline=head,
                    target_label="Target (ERL above)", entry_label="Entry zone (IRL below)", invalidation_label="Invalidation")
     elif direction == "bearish":
-        tgt = next((p for p in below[:3] if p["equal"]), below[0] if below else None)
+        tgt = below[0] if below else None  # nearest ERL first
         ent = zone("bearish", False) or (eq_level if r40["eq"] > close else None)
         sh = sd.get("swing_high")
         inv = ({"name": f"Daily swing high ({sd.get('swing_high_date')})", "price": sh, "dist": pct(sh, close)}
@@ -534,3 +534,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    try:
+        import extras  # v5: intraday + backtest
+        extras.run_all()
+    except Exception as e:
+        print("extras skipped:", e)

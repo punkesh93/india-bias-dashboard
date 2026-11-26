@@ -244,7 +244,7 @@
     const last = rows[rows.length - 1], prev = rows[rows.length - 2];
     const px = last ? { close: last.c, chg: prev ? (last.c / prev.c - 1) * 100 : null, asof: last.t } : { close: s.close, chg: null, asof: s.asof };
     el.innerHTML = hero(b, s, px) + `<div class="s-grid">${trend(b)}${where(I)}</div>` + draw(I)
-      + `<div class="s-grid">${who()}${world()}</div>` + alerts()
+      + `<div class="s-grid">${who()}${world()}</div>` + alerts() + (window.MP_EXTRA ? window.MP_EXTRA.simple(key) : "")
       + `<button class="cta" id="goPro">Pura analysis dekho → Pro mode</button>` + DISC_HI;
     $("#goPro").onclick = () => setMode("pro");
   }
@@ -324,7 +324,7 @@
     renderIdx(); apply(false); watchPsub();
     [D.bias, D.story, D.ict, D.poi, D.prices, D.cot] = await Promise.all(
       ["data/bias.json", "data/story.json", "data/ict.json", "data/participant_oi.json", "data/prices.json", "data/cot.json"].map(get));
-    renderFresh(); renderSimple(); setH();
+    renderFresh(); renderSimple(); setH(); window.MP_RENDER = renderSimple;
     let tries = 0; const t = setInterval(() => { tries++; if (syncPro() || tries > 25) clearInterval(t); }, 300);
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   })();
