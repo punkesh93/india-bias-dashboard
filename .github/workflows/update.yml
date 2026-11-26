@@ -1,0 +1,43 @@
+name: Update dashboard
+
+on:
+  schedule:
+    - cron: "45 14 * * 1-5"   # 20:15 IST, Monday-Friday
+    - cron: "30 21 * * 5"     # 03:00 IST Saturday (new COT report)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-dashboard
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python scripts/fetch_cot.py
+        continue-on-error: true
+      - run: python scripts/fetch_prices.py
+        continue-on-error: true
+      - run: python scripts/fetch_nse.py
+        continue-on-error: true
+      - name: Build bias, story and ICT map
+        run: |
+          python scripts/build_bias.py
+          python scripts/build_story.py
+          python scripts/ict_engine.py
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "data: $(date -u +%F-%H%M)"
+          git push
