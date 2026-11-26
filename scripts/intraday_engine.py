@@ -231,7 +231,7 @@ def main():
         out["instruments"][key] = {
             "today": today, "next": {"pdh": today["high"], "pdl": today["low"], "prev_close": today["close"]},
             "bars": bars, "setups_today": [s for s in sets if s["date"] == today["date"]], "setups_recent": sets[-12:],
-            "stats": stats(recs, sets),
+            "stats": stats_with_filters(recs, sets, key),
             "history": [{k: v for k, v in r.items() if not k.startswith("_")} for r in recs[-10:]]}
         s = out["instruments"][key]["stats"]
         for fl in s["setups"].get("filters", []):

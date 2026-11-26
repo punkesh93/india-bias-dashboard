@@ -123,7 +123,9 @@
     [X.intra, X.bt] = await Promise.all([get("data/intraday.json"), get("data/backtest.json")]);
     renderIntraday(); renderBacktest();
     try { const t = ((X.bt && X.bt.instruments && X.bt.instruments.SENSEX) || []).find((x) => x.id === "first_hour");
-      const m = t && t.summary.match(/in (\d+%)/); window.MP_STATS = { first_hour: m ? m[1] : null }; } catch (e) {}
+      const m = t && t.summary.match(/in (\d+%)/); const rj = ((X.bt && X.bt.instruments && X.bt.instruments.SENSEX) || []).find((x) => x.id === "sweep_rejection");
+      const q = rj && rj.summary.match(/inside (\d+%) of the time vs (\d+%)/);
+      window.MP_STATS = { first_hour: m ? m[1] : null, rej: q ? q[1] : null, brk: q ? q[2] : null }; } catch (e) {}
     if (window.MP_RENDER) window.MP_RENDER();
     document.addEventListener("click", (e) => { if (e.target.closest("#idxbar button")) setTimeout(() => { renderIntraday(); renderBacktest(); }, 0); });
   })();

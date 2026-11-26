@@ -212,6 +212,8 @@
     }
     const fh = window.MP_STATS && window.MP_STATS.first_hour;
     out.push(["t-up", `Opening range important: backtest mein ${fh || "~3/4"} days din ka high ya low pehle ghante (9:15–10:15) mein bana. Pehle ghante ka high/low mark karo.`]);
+    const ms = window.MP_STATS || {};
+    if (ms.rej) out.push(["t-up", `Opening sweep rule: pehle ghante mein kal ka high/low break hoke wapas andar close ho (rejection) → ${ms.rej} days din range ke andar close hua. Beyond hold kare → sirf ${ms.brk}.`]);
     const vr = D.prices && D.prices.series && D.prices.series.INDIAVIX && D.prices.series.INDIAVIX.rows;
     if (vr && vr.length) {
       const vx = vr[vr.length - 1].c;

@@ -3,6 +3,7 @@ import json
 import os
 import re
 import urllib.parse
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
@@ -117,8 +118,12 @@ def main():
         return
     data = urllib.parse.urlencode({"chat_id": CHAT, "text": text, "parse_mode": "HTML",
                                    "disable_web_page_preview": "true"}).encode()
-    with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data=data, timeout=30) as r:
-        res = json.loads(r.read().decode())
+    try:
+        with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data=data, timeout=30) as r:
+            res = json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="ignore")
+        res = json.loads(body) if body.startswith("{") else {"ok": False, "description": body}
     print("Telegram:", "sent" if res.get("ok") else res)
 
 
