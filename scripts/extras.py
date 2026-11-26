@@ -4,7 +4,8 @@
 def run_all():
     import backtest
     import intraday_engine
-    for name, mod in (("intraday", intraday_engine), ("backtest", backtest)):
+    import robustness
+    for name, mod in (("intraday", intraday_engine), ("backtest", backtest), ("robustness", robustness)):
         try:
             mod.main()
         except Exception as e:
