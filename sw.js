@@ -1,4 +1,4 @@
-const V = "mp-202611261508";
+const V = "mp-202611261518";
 const SHELL = ["./", "index.html", "style.css", "ict.css", "mobile.css", "app.css", "config.js", "mobile.js",
   "app.js", "ict.js", "simple.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener("install", (e) => {
