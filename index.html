@@ -2,111 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>India Market Bias</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Market Pulse">
+  <meta name="description" content="Sensex, Nifty aur Bank Nifty ka smart-money view: liquidity, FII positioning, COT aur ICT concepts ek jagah.">
+  <title>Market Pulse - India Smart Money</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ict.css">
-  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="stylesheet" href="mobile.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script src="mobile.js"></script>
+  <script src="config.js"></script>
 </head>
 <body>
-<header class="top">
-  <div class="brand"><span class="logo">◆</span> India Market Bias</div>
-  <nav>
-    <a href="#today">Today</a><a href="#ict">ICT map</a><a href="#bias">Bias</a><a href="#global">Global money</a>
-    <a href="#india">FII vs Retail</a><a href="#chart">Price map</a><a href="#guide">How to read</a>
-  </nav>
-  <div id="updated" class="pill"></div>
+<header class="appbar" id="appbar">
+  <div class="appbar-row">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h4l3-8 4 14 3-8h6"/></svg></div>
+    <div><div class="brand-name" id="brandName">Market Pulse</div><div class="brand-sub" id="brandSub">Smart money ko samjho</div></div>
+    <nav class="modeseg"><button data-v="simple">Aaj</button><button data-v="pro">Pro</button><button data-v="learn">Seekho</button></nav>
+    <div class="fresh" id="fresh"><span class="dot"></span><span id="freshTxt">Loading…</span></div>
+  </div>
+  <div class="idxbar" id="idxbar"></div>
 </header>
 
-<main>
-  <section id="today">
-    <div class="tabs" id="instTabs"></div>
-    <div id="story"></div>
-  </section>
+<main class="wrap">
+  <section class="view" id="view-simple"><div id="simple"><div class="s-card skeleton">Data load ho raha hai…</div></div></section>
 
-  <section id="ict"></section>
+  <section class="view" id="view-pro">
+    <nav class="psub">
+      <a href="#today">Story</a><a href="#ict">ICT Map</a><a href="#bias">Bias</a>
+      <a href="#global">Global</a><a href="#india">FII vs Retail</a><a href="#chart">Chart</a><a href="#guide">Guide</a>
+    </nav>
+    <p class="pro-note">Detailed analysis · <span id="updated"></span></p>
 
-  <section id="bias">
-    <div class="sec-head"><h2>Bias at a glance</h2>
-      <p>Each cell is a vote count. Bigger bar = more votes agree. Click a cell to see every vote in plain English.</p></div>
-    <div class="bwrap"><div id="biasGrid"></div></div>
-    <div id="votes" class="card hidden"></div>
-  </section>
+    <section id="today">
+      <div class="sec-head"><h2>Today's story</h2><p>Where price is coming from, what it's doing, what's next.</p></div>
+      <div class="tabs" id="instTabs"></div>
+      <div id="story"></div>
+    </section>
 
-  <section id="global">
-    <div class="sec-head"><h2>Global money flow</h2>
-      <p>What hedgers (ICT's "smart money" / Commercials) are doing in markets that move Indian stocks. Updated weekly from the CFTC.</p></div>
-    <div id="cotCards" class="grid3"></div>
-    <div class="card">
-      <div class="row">
-        <select id="cotSel"></select>
-        <select id="cotLb"><option value="26">26-week range</option><option value="52" selected>52-week range</option><option value="156">3-year range</option></select>
-        <div class="legend"><span><i style="background:#ef4444"></i>Commercials (smart money)</span><span><i style="background:#22c55e"></i>Large specs (funds)</span><span><i style="background:#3b82f6"></i>Small specs (retail)</span></div>
+    <section id="ict"></section>
+
+    <section id="bias">
+      <div class="sec-head"><h2>Bias at a glance</h2><p>Each cell is a vote count. Bigger bar = more votes agree. Tap a cell to see every vote.</p></div>
+      <div class="bwrap"><div id="biasGrid"></div></div>
+      <div id="votes" class="card hidden"></div>
+    </section>
+
+    <section id="global">
+      <div class="sec-head"><h2>Global money flow</h2><p>What hedgers (Commercials / smart money) are doing in markets that move Indian stocks. Weekly, from the CFTC.</p></div>
+      <div id="cotCards" class="grid3"></div>
+      <div class="card">
+        <div class="row">
+          <select id="cotSel"></select>
+          <select id="cotLb"><option value="26">26-week range</option><option value="52" selected>52-week range</option><option value="156">3-year range</option></select>
+          <div class="legend"><span><i style="background:#ef4444"></i>Commercials</span><span><i style="background:#22c55e"></i>Large specs</span><span><i style="background:#3b82f6"></i>Small specs</span></div>
+        </div>
+        <div id="cotNet" class="chart"></div>
+        <div id="cotIdx" class="chart small"></div>
       </div>
-      <div id="cotNet" class="chart"></div>
-      <div id="cotIdx" class="chart small"></div>
-    </div>
-    <details class="howto"><summary>How to read this</summary>
-      <p>Top chart: net positions. Above zero = net long, below = net short. Commercials usually move opposite to large speculators.</p>
-      <p>Bottom chart: the COT Index - where today's commercial position sits in its range. Above 80 = near their most bullish, below 20 = near their most bearish. An extreme is a warning, not an entry: ICT waits for price to run liquidity (take out equal highs or lows) before acting on it.</p>
-    </details>
-  </section>
+    </section>
 
-  <section id="india">
-    <div class="sec-head"><h2>FII vs Retail in Indian F&amp;O</h2>
-      <p>NSE participant-wise open interest - India's daily version of the COT report.</p></div>
-    <div id="poiCards" class="grid4"></div>
-    <div class="card">
-      <div class="row">
-        <select id="poiSeg"><option value="fut">Index futures (net)</option><option value="opt">Index options (directional net)</option></select>
-        <div class="legend"><span><i style="background:#f59e0b"></i>FII</span><span><i style="background:#a855f7"></i>DII</span><span><i style="background:#3b82f6"></i>Client</span><span><i style="background:#22c55e"></i>Pro</span><span><i style="background:#e2e8f0"></i>Nifty (left axis)</span></div>
+    <section id="india">
+      <div class="sec-head"><h2>FII vs Retail in Indian F&amp;O</h2><p>NSE participant-wise open interest - India's daily version of the COT report.</p></div>
+      <div id="poiCards" class="grid4"></div>
+      <div class="card">
+        <div class="row">
+          <select id="poiSeg"><option value="fut">Index futures (net)</option><option value="opt">Index options (directional net)</option></select>
+          <div class="legend"><span><i style="background:#f59e0b"></i>FII</span><span><i style="background:#a855f7"></i>DII</span><span><i style="background:#3b82f6"></i>Client</span><span><i style="background:#22c55e"></i>Pro</span><span><i style="background:#e2e8f0"></i>Nifty</span></div>
+        </div>
+        <div id="poiChart" class="chart"></div>
       </div>
-      <div id="poiChart" class="chart"></div>
-    </div>
-    <details class="howto"><summary>How to read this</summary>
-      <p>Healthy rally: FIIs covering shorts or adding longs while retail sells. Suspicious rally: price rising while FIIs add shorts. The mirror image applies to declines.</p>
-      <p>Options line = (calls bought - calls sold) - (puts bought - puts sold). Positive = net bullish option exposure.</p>
-    </details>
+    </section>
+
+    <section id="chart">
+      <div class="sec-head"><h2>Price map</h2><p>Dashed lines = previous week (PW), month (PM) and quarter (PQ) highs and lows.</p></div>
+      <div class="card"><div class="row"><select id="pxSel"></select></div><div id="pxChart" class="chart tall"></div></div>
+    </section>
+
+    <section id="guide">
+      <div class="sec-head"><h2>How to read Pro</h2></div>
+      <div class="guide">
+        <div class="card"><b class="n">1</b><h3>Top-down</h3><p>Yearly and Quarterly give the big draw. Trade Monthly/Weekly in that direction.</p></div>
+        <div class="card"><b class="n">2</b><h3>Liquidity first</h3><p>ICT map: target = nearest unswept liquidity; entries come at IRL (FVG / equilibrium), not at highs.</p></div>
+        <div class="card"><b class="n">3</b><h3>Who is driving</h3><p>FII covering while retail sells = healthy. FII adding shorts into a rally = suspect.</p></div>
+        <div class="card"><b class="n">4</b><h3>Confirm</h3><p>SMT between Sensex, Nifty and Bank Nifty plus the COT backdrop, then your intraday entry model.</p></div>
+      </div>
+    </section>
   </section>
 
-  <section id="chart">
-    <div class="sec-head"><h2>Price map</h2>
-      <p>Dashed lines = previous week (PW), month (PM) and quarter (PQ) highs and lows - the liquidity pools ICT watches.</p></div>
-    <div class="card">
-      <div class="row"><select id="pxSel"></select></div>
-      <div id="pxChart" class="chart tall"></div>
-    </div>
-  </section>
-
-  <section id="guide">
-    <div class="sec-head"><h2>How to read the dashboard</h2><p>A top-down routine in four steps.</p></div>
-    <div class="guide">
-      <div class="card"><b class="n">1</b><h3>Start from the top</h3><p>Yearly and Quarterly show the big draw on liquidity. Take Monthly and Weekly trades in that direction; treat counter-trend ideas as quick trades only.</p></div>
-      <div class="card"><b class="n">2</b><h3>Check global money</h3><p>Hedgers short the dollar and long US bonds = tailwind for Nifty. Hedgers long crude = pressure on the rupee. Your old DXY + yields check, automated.</p></div>
-      <div class="card"><b class="n">3</b><h3>Check who is driving</h3><p>Is the move led by FIIs (real) or retail (fragile)? FII flips across zero are transitions, not instant signals.</p></div>
-      <div class="card"><b class="n">4</b><h3>Use the levels</h3><p>"What's next" gives the target liquidity and the invalidation level. Wait for your ICT entry model at those levels; Daily bias is session context only.</p></div>
-    </div>
-    <div class="card keys">
-      <span><b class="bull-t">▲ Bullish</b> majority of votes up</span>
-      <span><b class="bear-t">▼ Bearish</b> majority of votes down</span>
-      <span><b class="neu-t">◆ Neutral</b> votes mixed - no edge</span>
-      <span><b>80 / 20</b> extreme readings</span>
-    </div>
-  </section>
+  <section class="view" id="view-learn"><div id="learn"></div></section>
 </main>
-<nav class="mnav" aria-label="Sections">
-  <a href="#today"><b>◎</b>Today</a>
-  <a href="#ict"><b>◈</b>ICT</a>
-  <a href="#bias"><b>▦</b>Bias</a>
-  <a href="#india"><b>⇅</b>Flows</a>
-  <a href="#chart"><b>⌁</b>Chart</a>
+
+<nav class="tabbar">
+  <button data-v="simple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h4l3-8 4 14 3-8h6"/></svg>Aaj</button>
+  <button data-v="pro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg>Pro</button>
+  <button data-v="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Seekho</button>
 </nav>
-<footer>Positioning context only - not trading advice. Data: CFTC, NSE, Yahoo Finance.</footer>
+<!-- legacy marker so the retired mobile cell never re-adds its nav: class="mnav" -->
+<footer class="foot">Sirf shiksha aur analysis ke liye · Trading advice nahi · Data: CFTC, NSE, Yahoo Finance</footer>
+
 <script src="app.js"></script>
 <script src="ict.js"></script>
+<script src="simple.js"></script>
 </body>
 </html>
