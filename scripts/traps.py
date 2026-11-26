@@ -101,9 +101,13 @@ def open_fvgs(df, look=150):
             "below": sorted([x for x in out if x["high"] < c], key=lambda x: -x["high"])[:3]}
 
 
-def daily_trap(I):
+def daily_trap(I, df=None):
     td = I.get("today") or {}
     day, pdh, pdl = td.get("date"), td.get("pdh"), td.get("pdl")
+    if df is not None and day:
+        prev = df[df.index < pd.Timestamp(day)]
+        if len(prev):
+            pdh, pdl = round(float(prev.h.iloc[-1]), 2), round(float(prev.l.iloc[-1]), 2)  # official daily bar
     tb = [b for b in I.get("bars", []) if datetime.fromtimestamp(b["t"], timezone.utc).strftime("%Y-%m-%d") == day]
     base = {"date": day, "pdh": pdh, "pdl": pdl}
     if len(tb) < 4 or pdh is None:
@@ -234,10 +238,19 @@ def main():
         out["instruments"][key] = {
             "close": round(float(df.c.iloc[-1]), 2), "asof": df.index[-1].strftime("%Y-%m-%d"),
             "structure": structure(df), "levels": levels(df), "range3y": rng(df, 756), "range12m": rng(df, 252),
-            "fvg": open_fvgs(df), "daily": daily_trap(I) if I else None, "weekly": weekly_trap(df),
+            "fvg": open_fvgs(df), "daily": daily_trap(I, df) if I else None, "weekly": weekly_trap(df),
             "pd_taken": st.get("pd_level_taken"), "sessions": st.get("sessions")}
         x = out["instruments"][key]
         print(f"{key:9} daily={(x['daily'] or {}).get('kind')}  weekly={(x['weekly'] or {}).get('kind')}  3y range {x['range3y']['pos']}%")
+    log = load("trap_log.json", {}) or {}
+    ent = {(e["type"], e["key"], e["date"]): e for e in log.get("entries", [])}
+    for key, x in out["instruments"].items():
+        d, w = x.get("daily") or {}, x.get("weekly") or {}
+        if d.get("complete") and d.get("kind") in ("rejection", "held"):
+            ent[("daily", key, d["date"])] = {"type": "daily", "key": key, "date": d["date"], "kind": d["kind"], "back_inside": d.get("back_inside")}
+        if w.get("kind") in ("rejection", "held"):
+            ent[("weekly", key, w["week_start"])] = {"type": "weekly", "key": key, "date": w["week_start"], "kind": w["kind"], "back_inside": w.get("back_inside")}
+    save("trap_log.json", {"since": log.get("since") or now_ist()[:10], "entries": sorted(ent.values(), key=lambda e: (e["date"], e["key"], e["type"]))})
     save("traps.json", out)
 
 
