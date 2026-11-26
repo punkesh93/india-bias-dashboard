@@ -234,6 +234,84 @@ def t_hourly_cond(h):
     ]
 
 
+def _sim(side, entry, stop, target, rest, close, tr):
+    risk = abs(entry - stop)
+    if risk <= 0:
+        return None
+    if target is not None and ((side == "long" and target <= entry) or (side == "short" and target >= entry)):
+        target = None
+    r = None
+    for _, b in rest.iterrows():
+        if side == "long":
+            if b["l"] <= stop:
+                r = -1.0; break
+            if target is not None and b["h"] >= target:
+                r = (target - entry) / risk; break
+        else:
+            if b["h"] >= stop:
+                r = -1.0; break
+            if target is not None and b["l"] <= target:
+                r = (entry - target) / risk; break
+    if r is None:
+        r = ((close - entry) if side == "long" else (entry - close)) / risk
+    want = "bullish" if side == "long" else "bearish"
+    return {"r": float(r), "trend": None if tr is None else (tr == want)}
+
+
+def _agg(name, lst):
+    lst = [x for x in lst if x]
+    if not lst:
+        return [name, 0, "-", "-", "-"], 0.0
+    rs = [x["r"] for x in lst]
+    n, m = len(rs), sum(rs) / len(rs)
+    sd = (sum((x - m) ** 2 for x in rs) / (n - 1)) ** 0.5 if n > 1 else 0
+    z = m / (sd / n ** 0.5) if sd > 0 else 0.0
+    return [name, n, f"{100 * sum(x > 0 for x in rs) / n:.0f}%", f"{m:+.2f}R", f"{sum(rs):+.1f}R"], z
+
+
+def t_rules(h, d):
+    sma = d["c"].rolling(20).mean()
+    trend = {}
+    for i in range(1, len(d)):
+        if pd.notna(sma.iloc[i - 1]):
+            trend[d.index[i].date()] = "bullish" if d["c"].iloc[i - 1] > sma.iloc[i - 1] else "bearish"
+    rev, cont, prev = [], [], None
+    for k, g in h.groupby(h.index.date):
+        if len(g) < 5:
+            continue
+        if prev is not None:
+            pdh, pdl = prev["h"].max(), prev["l"].min()
+            eq = (pdh + pdl) / 2
+            f, rest, close, tr = g.iloc[0], g.iloc[1:], g["c"].iloc[-1], trend.get(k)
+            if f["h"] > pdh:
+                if f["c"] < pdh:
+                    rev.append(_sim("short", f["c"], f["h"], eq, rest, close, tr))
+                else:
+                    cont.append(_sim("long", f["c"], f["l"], None, rest, close, tr))
+            if f["l"] < pdl:
+                if f["c"] > pdl:
+                    rev.append(_sim("long", f["c"], f["l"], eq, rest, close, tr))
+                else:
+                    cont.append(_sim("short", f["c"], f["h"], None, rest, close, tr))
+        prev = g
+    out = []
+    for lst, tid, title, claim in (
+        (rev, "rule_fade", "Rule: fade a first-hour sweep that closes back inside",
+         "Trade against a first-hour PDH/PDL sweep that closes back inside; stop beyond the first-hour extreme; exit at the previous-day midpoint or the close."),
+        (cont, "rule_follow", "Rule: follow a first-hour break that holds beyond",
+         "Trade with a first-hour break of PDH/PDL that closes beyond it; stop at the other end of the first hour; exit at the close."),
+    ):
+        row_all, z = _agg("All", lst)
+        row_al, _ = _agg("Trend-aligned", [x for x in lst if x and x["trend"] is True])
+        row_ct, _ = _agg("Counter-trend", [x for x in lst if x and x["trend"] is False])
+        v = verdict(z)
+        out.append({"id": tid, "title": title, "title_hi": "", "claim": claim, "verdict": v,
+                    "summary": f"{row_all[1]} trades: win rate {row_all[2]}, average {row_all[3]} per trade, total {row_all[4]} (before costs).",
+                    "hi": "", "cols": ["Filter", "Trades", "Win rate", "Avg R", "Total R"],
+                    "rows": [row_all, row_al, row_ct], "sample": "2 years of hourly data; costs and slippage not included"})
+    return out
+
+
 def main():
     out = {"generated": now_ist(), "instruments": {}}
     for key, t in TICKERS.items():
@@ -257,6 +335,7 @@ def main():
             if h is not None:
                 tests += t_hourly(h)
                 tests += t_hourly_cond(h)
+                tests += t_rules(h, d)
         except Exception as e:
             print(f"{key}: hourly tests failed ({e})")
         out["instruments"][key] = tests

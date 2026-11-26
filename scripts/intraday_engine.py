@@ -12,7 +12,7 @@ ZONES_HI = {"Open kill zone": "subah ka kill zone", "Midday lull": "dopahar ka s
 SB = [("09:30", "10:30"), ("13:30", "14:30")]
 
 
-def fetch(ticker):
+def fetch(ticker, key=None):
     df = yf.Ticker(ticker).history(period="60d", interval="15m", auto_adjust=False)
     if df is None or df.empty:
         return None
@@ -20,7 +20,14 @@ def fetch(ticker):
     df.index = idx.tz_convert("Asia/Kolkata") if idx.tz is not None else idx.tz_localize("UTC").tz_convert("Asia/Kolkata")
     df = df[["Open", "High", "Low", "Close"]].dropna()
     df.columns = ["o", "h", "l", "c"]
-    return df.between_time("09:15", "15:29")
+    df = df.between_time("09:15", "15:29")
+    if key:
+        try:
+            import archive_intraday
+            df = archive_intraday.merge(key, df)
+        except Exception as e:
+            print("archive merge skipped:", e)
+    return df
 
 
 def zone(ts):
@@ -205,7 +212,7 @@ def main():
            "silver_bullet": [{"from": a, "to": b} for a, b in SB], "instruments": {}}
     for key, t in TICKERS.items():
         try:
-            df = fetch(t)
+            df = fetch(t, key)
         except Exception as e:
             print(f"{key}: intraday fetch failed ({e})")
             continue
