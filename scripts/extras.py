@@ -6,7 +6,8 @@ def run_all():
     import intraday_engine
     import robustness
     import positioning_study
-    for name, mod in (("intraday", intraday_engine), ("backtest", backtest), ("robustness", robustness), ("positioning", positioning_study)):
+    import traps
+    for name, mod in (("intraday", intraday_engine), ("backtest", backtest), ("robustness", robustness), ("positioning", positioning_study), ("traps", traps)):
         try:
             mod.main()
         except Exception as e:

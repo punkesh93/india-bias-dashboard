@@ -15,14 +15,14 @@
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=202611261638">
-  <link rel="stylesheet" href="ict.css?v=202611261638">
-  <link rel="stylesheet" href="mobile.css?v=202611261638">
-  <link rel="stylesheet" href="app.css?v=202611261638">
+  <link rel="stylesheet" href="style.css?v=202611261746">
+  <link rel="stylesheet" href="ict.css?v=202611261746">
+  <link rel="stylesheet" href="mobile.css?v=202611261746">
+  <link rel="stylesheet" href="app.css?v=202611261746">
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-  <script src="mobile.js?v=202611261638"></script>
-  <script src="config.js?v=202611261638"></script>
-  <link rel="stylesheet" href="extra.css?v=202611261638">
+  <script src="mobile.js?v=202611261746"></script>
+  <script src="config.js?v=202611261746"></script>
+  <link rel="stylesheet" href="extra.css?v=202611261746">
 </head>
 <body>
 <header class="appbar" id="appbar">
@@ -42,8 +42,8 @@
     <div class="fresh" id="fresh"><span class="dot"></span><span id="freshTxt">…</span></div>
   </div>
   <nav class="psub" id="psub">
-    <a href="#today">Story</a><a href="#ict">ICT Map</a><a href="#bias">Bias</a>
-    <a href="#global">Global</a><a href="#india">FII vs Retail</a><a href="#chart">Chart</a><a href="#intraday">Intraday</a><a href="#backtest">Proven</a><a href="#guide">Guide</a>
+    <a href="#today">Story</a>
+    <a href="#global">Global</a><a href="#india">FII vs Retail</a><a href="#chart">Chart</a><a href="#trapwatch">Trap Watch</a><a href="#levels">Levels</a><a href="#intraday">Intraday</a><a href="#backtest">Proven</a><a href="#guide">Guide</a>
   </nav>
 </header>
 
@@ -59,9 +59,9 @@
       <div id="story"></div>
     </section>
 
-    <section id="ict"></section>
+    <section id="ict" hidden></section>
 
-    <section id="bias">
+    <section id="bias" hidden>
       <div class="sec-head"><h2>Bias at a glance</h2><p>Each cell is a vote count across signals. Tap a cell to see every vote.</p></div>
       <div class="bwrap"><div id="biasGrid"></div></div>
       <div id="votes" class="card hidden"></div>
@@ -98,6 +98,10 @@
       <div class="card"><div class="row"><select id="pxSel"></select></div><div id="pxChart" class="chart tall"></div></div>
     </section>
 
+    <section id="trapwatch"></section>
+
+    <section id="levels"></section>
+
     <section id="intraday"></section>
 
     <section id="backtest"></section>
@@ -118,9 +122,10 @@
 <!-- legacy marker so the retired mobile cell never re-adds its nav: class="mnav" -->
 <footer class="foot" id="foot"></footer>
 
-<script src="app.js?v=202611261638"></script>
-<script src="ict.js?v=202611261638"></script>
-<script src="pro_extra.js?v=202611261638"></script>
-<script src="simple.js?v=202611261638"></script>
+<script src="app.js?v=202611261746"></script>
+<script src="ict.js?v=202611261746"></script>
+<script src="pro_extra.js?v=202611261746"></script>
+<script src="final.js?v=202611261746"></script>
+<script src="simple.js?v=202611261746"></script>
 </body>
 </html>
