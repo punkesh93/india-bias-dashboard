@@ -219,8 +219,12 @@
     }
     ((D.ict && D.ict.smt) || []).filter((r) => (r.a === key || r.b === key) && (r.type === "bullish" || r.type === "bearish")).slice(0, 2).forEach((r) => {
       out.push(r.type === "bullish"
-        ? ["t-up", `SMT signal: ${NAME[r.a]} aur ${NAME[r.b]} saath nahi chale — neeche ke stop-loss sirf ek mein saaf hue. Smart money ke neeche se kharidne ka sign ho sakta hai.`]
-        : ["t-down", `SMT warning: ${NAME[r.a]} aur ${NAME[r.b]} mein se ek ne naya high banaya, doosre ne nahi — upar kamzori ka sign.`]);
+        ? ["t-up", r.corr < 0
+            ? `SMT signal: ${NAME[r.a]} ki kamzori ko ${NAME[r.b]} ne confirm nahi kiya (dono aam taur pe ulte chalte hain). Neeche se kharidari ka sign ho sakta hai.`
+            : `SMT signal: ${NAME[r.a]} aur ${NAME[r.b]} saath nahi chale — neeche ke stop-loss sirf ek mein saaf hue. Smart money ke neeche se kharidne ka sign ho sakta hai.`]
+        : ["t-down", r.corr < 0
+            ? `SMT warning: ${NAME[r.a]} ki tezi ko ${NAME[r.b]} ne confirm nahi kiya (dono aam taur pe ulte chalte hain). Upar kamzori ka sign.`
+            : `SMT warning: ${NAME[r.a]} aur ${NAME[r.b]} mein se ek ne naya high banaya, doosre ne nahi — upar kamzori ka sign.`]);
     });
     const rk = D.story && D.story.instruments && D.story.instruments[key] && D.story.instruments[key].risks;
     if (rk && rk.length) out.push(["", `${rk.length} signals is view ke khilaf hain — detail Pro mode mein.`]);

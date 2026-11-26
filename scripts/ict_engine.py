@@ -421,6 +421,10 @@ def draw_on_liquidity(close, sd, sw, ev, above, below, fv, obs, rngs, smt_b):
         sl = sd.get("swing_low")
         inv = ({"name": f"Daily swing low ({sd.get('swing_low_date')})", "price": sl, "dist": pct(sl, close)}
                if sl and sl < close else (below[0] if below else None))
+        lo_e = ent.get("low", ent.get("price")) if ent else None  # FIX-INV
+        if inv and lo_e is not None and inv["price"] >= lo_e:
+            nxt = [p for p in below if p["price"] < lo_e]
+            inv = nxt[0] if nxt else {"name": "Below the entry zone", "price": r2(lo_e * 0.995), "dist": pct(lo_e * 0.995, close)}
         if k == ("raid", "low"):
             idx, stage = 0, ("Sell-side was just raided and price closed back inside (manipulation). Expect displacement "
                              "higher; the first entry is the rebalance of the gap it leaves.")
@@ -440,6 +444,10 @@ def draw_on_liquidity(close, sd, sw, ev, above, below, fv, obs, rngs, smt_b):
         sh = sd.get("swing_high")
         inv = ({"name": f"Daily swing high ({sd.get('swing_high_date')})", "price": sh, "dist": pct(sh, close)}
                if sh and sh > close else (above[0] if above else None))
+        hi_e = ent.get("high", ent.get("price")) if ent else None  # FIX-INV
+        if inv and hi_e is not None and inv["price"] <= hi_e:
+            nxt = [p for p in above if p["price"] > hi_e]
+            inv = nxt[0] if nxt else {"name": "Above the entry zone", "price": r2(hi_e * 1.005), "dist": pct(hi_e * 1.005, close)}
         if k == ("raid", "high"):
             idx, stage = 0, ("Buy-side was just raided and price closed back inside (manipulation). Expect displacement "
                              "lower; the first entry is the rebalance of the gap it leaves.")
