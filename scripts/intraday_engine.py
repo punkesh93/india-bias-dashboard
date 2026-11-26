@@ -2,7 +2,7 @@
 import pandas as pd
 import yfinance as yf
 
-from common import now_ist, save
+from common import load, now_ist, save
 
 TICKERS = {"SENSEX": "^BSESN", "NIFTY": "^NSEI", "BANKNIFTY": "^NSEBANK"}
 ZONES = [("Open kill zone", "09:15", "10:30"), ("Midday lull", "10:30", "13:00"),
@@ -167,6 +167,39 @@ def stats(recs, sets):
                        "sb_filled": len(sb), "sb_win_rate": wr(sb), "sb_avg_r": avg(sb)}}
 
 
+def daily_trend(key):
+    rows = ((load("prices.json", {}) or {}).get("series", {}).get(key, {}) or {}).get("rows", [])
+    if len(rows) < 25:
+        return {}
+    s = pd.Series([r["c"] for r in rows], index=[r["t"] for r in rows])
+    sma = s.rolling(20).mean()
+    out = {}
+    for i in range(1, len(s)):
+        if pd.notna(sma.iloc[i - 1]):
+            out[s.index[i]] = "bullish" if s.iloc[i - 1] > sma.iloc[i - 1] else "bearish"
+    return out
+
+
+def stats_with_filters(recs, sets, key):
+    st = stats(recs, sets)
+    trend = daily_trend(key)
+    filled = [s for s in sets if s["result"] != "no fill"]
+
+    def agg(name, lst):
+        if not lst:
+            return {"name": name, "n": 0, "win_rate": None, "avg_r": None}
+        return {"name": name, "n": len(lst), "win_rate": round(100 * sum(s["result"] == "win" for s in lst) / len(lst), 1),
+                "avg_r": round(sum(s["r"] for s in lst) / len(lst), 2)}
+
+    al = [s for s in filled if trend.get(s["date"]) == s["side"]]
+    ct = [s for s in filled if trend.get(s["date"]) and trend.get(s["date"]) != s["side"]]
+    kz = [s for s in filled if s["zone"] == "Open kill zone"]
+    st["setups"]["filters"] = [agg("All filled setups", filled), agg("Trend-aligned (20-day average)", al),
+                               agg("Counter-trend", ct), agg("Open kill zone only", kz),
+                               agg("Trend-aligned + open kill zone", [s for s in al if s["zone"] == "Open kill zone"])]
+    return st
+
+
 def main():
     out = {"generated": now_ist(), "zones": [{"name": n, "from": a, "to": b} for n, a, b in ZONES],
            "silver_bullet": [{"from": a, "to": b} for a, b in SB], "instruments": {}}
@@ -201,6 +234,8 @@ def main():
             "stats": stats(recs, sets),
             "history": [{k: v for k, v in r.items() if not k.startswith("_")} for r in recs[-10:]]}
         s = out["instruments"][key]["stats"]
+        for fl in s["setups"].get("filters", []):
+            print(f"   {key:9} {fl['name']:32} n={fl['n']:3}  win={fl['win_rate']}%  avgR={fl['avg_r']}")
         print(f"{key:9} {today['date']} {today['direction']:8} judas={today['judas']} | {s['sessions']} sessions, "
               f"extreme in open KZ {s['extreme_in_open_kz']}%, setups {s['setups']['filled']} filled, win {s['setups']['win_rate']}%")
     save("intraday.json", out)

@@ -192,6 +192,48 @@ def t_hourly(h):
     ]
 
 
+def t_hourly_cond(h):
+    days = [g for _, g in h.groupby(h.index.date) if len(g) >= 5]
+    if len(days) < 30:
+        return []
+    opp = n = rej_n = rej_rev = brk_n = brk_rev = 0
+    prev = None
+    for g in days:
+        f, c = g.iloc[0], g["c"].iloc[-1]
+        a, b = f["c"] - f["o"], c - f["c"]
+        if a != 0 and b != 0:
+            n += 1
+            opp += (a > 0) != (b > 0)
+        if prev is not None:
+            pdh, pdl = prev["h"].max(), prev["l"].min()
+            for took, rejected, back in ((f["h"] > pdh, f["c"] < pdh, c < pdh), (f["l"] < pdl, f["c"] > pdl, c > pdl)):
+                if not took:
+                    continue
+                if rejected:
+                    rej_n += 1
+                    rej_rev += bool(back)
+                else:
+                    brk_n += 1
+                    brk_rev += bool(back)
+        prev = g
+    v1 = verdict(z_prop(opp, n, 0.5))
+    base = brk_rev / brk_n if brk_n else 0.5
+    v2 = verdict(z_prop(rej_rev, rej_n, base)) if rej_n and brk_n else "Doesn't hold"
+    return [
+        {"id": "fakeout_fair", "title": "Opening move vs rest of day (fair test)", "title_hi": "",
+         "claim": "After the first hour, the rest of the day tends to move against the opening move.", "verdict": v1,
+         "summary": f"After the first hour, the rest of the day moved opposite to the first-hour move in {pc(opp, n)} of sessions (random 50%).",
+         "hi": "", "cols": [], "rows": [], "sample": f"{n} sessions (2 years, hourly)"},
+        {"id": "sweep_rejection", "title": "Opening PDH/PDL sweep: rejection close vs holding beyond", "title_hi": "",
+         "claim": "A first-hour sweep of yesterday's high/low that closes back inside reverses more often than one that holds beyond.",
+         "verdict": v2,
+         "summary": f"With a rejection close in the first hour, the day closed back inside {pc(rej_rev, rej_n)} of the time vs {pc(brk_rev, brk_n)} when the first hour held beyond.",
+         "hi": "", "cols": ["First hour", "Cases", "Day closed back inside"],
+         "rows": [["Rejection close", rej_n, pc(rej_rev, rej_n)], ["Held beyond", brk_n, pc(brk_rev, brk_n)]],
+         "sample": "2 years, hourly"},
+    ]
+
+
 def main():
     out = {"generated": now_ist(), "instruments": {}}
     for key, t in TICKERS.items():
@@ -214,6 +256,7 @@ def main():
             h = hourly(t)
             if h is not None:
                 tests += t_hourly(h)
+                tests += t_hourly_cond(h)
         except Exception as e:
             print(f"{key}: hourly tests failed ({e})")
         out["instruments"][key] = tests

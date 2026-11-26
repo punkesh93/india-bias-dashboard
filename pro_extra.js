@@ -54,7 +54,7 @@
           ${stat("High or low in open kill zone", s.extreme_in_open_kz + "%")}${stat("Judas-swing days", s.judas_days + "%")}
           ${stat("Previous-day high/low taken", s.pd_level_taken + "%")}${stat("…raided and closed back inside", s.pd_level_raided + "%")}
           ${stat("Setups found / filled", S.found + " / " + S.filled)}${stat("Win rate (filled)", S.win_rate == null ? "–" : S.win_rate + "%")}
-          ${stat("Average R (filled)", S.avg_r)}${stat("Silver Bullet window: filled / win rate", S.sb_filled + " / " + (S.sb_win_rate == null ? "–" : S.sb_win_rate + "%"))}</div>
+          ${stat("Average R (filled)", S.avg_r)}${stat("Silver Bullet window: filled / win rate", S.sb_filled + " / " + (S.sb_win_rate == null ? "–" : S.sb_win_rate + "%"))}${(S.filters || []).map((f) => stat(f.name, f.n ? `${f.n} trades · ${f.win_rate}% win · ${f.avg_r}R` : "–")).join("")}</div>
       </div>
       <div class="card" style="margin-top:12px"><h3>Next session levels</h3>
         <div class="ohlc"><span>New PDH <b>${num(I.next.pdh)}</b></span><span>New PDL <b>${num(I.next.pdl)}</b></span><span>Close <b>${num(I.next.prev_close)}</b></span></div>
@@ -122,6 +122,8 @@
   (async function () {
     [X.intra, X.bt] = await Promise.all([get("data/intraday.json"), get("data/backtest.json")]);
     renderIntraday(); renderBacktest();
+    try { const t = ((X.bt && X.bt.instruments && X.bt.instruments.SENSEX) || []).find((x) => x.id === "first_hour");
+      const m = t && t.summary.match(/in (\d+%)/); window.MP_STATS = { first_hour: m ? m[1] : null }; } catch (e) {}
     if (window.MP_RENDER) window.MP_RENDER();
     document.addEventListener("click", (e) => { if (e.target.closest("#idxbar button")) setTimeout(() => { renderIntraday(); renderBacktest(); }, 0); });
   })();

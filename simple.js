@@ -207,9 +207,11 @@
     const wd = new Date(Date.now() + 330 * 60000).getUTCDay();
     const exp = { SENSEX: [4, "Sensex weekly expiry (BSE)"], NIFTY: [2, "Nifty weekly expiry (NSE)"] }[key];
     if (exp) {
-      if (wd === exp[0]) out.push(["t-warn", `Aaj ${exp[1]} hai — closing tak fast aur volatile moves ho sakte hain. Option premium tezi se decay hota hai.`]);
+      if (wd === exp[0]) out.push(["t-warn", `Aaj ${exp[1]} hai — option premium (time value) tezi se decay hota hai. Note: backtest mein expiry day ka range normal din jaisa hi nikla.`]);
       else if ((wd + 1) % 7 === exp[0]) out.push(["t-warn", `Kal ${exp[1]} hai. (Holiday ho toh expiry ek din pehle.)`]);
     }
+    const fh = window.MP_STATS && window.MP_STATS.first_hour;
+    out.push(["t-up", `Opening range important: backtest mein ${fh || "~3/4"} days din ka high ya low pehle ghante (9:15–10:15) mein bana. Pehle ghante ka high/low mark karo.`]);
     const vr = D.prices && D.prices.series && D.prices.series.INDIAVIX && D.prices.series.INDIAVIX.rows;
     if (vr && vr.length) {
       const vx = vr[vr.length - 1].c;

@@ -306,11 +306,11 @@ def week_profile(df, a):
     if c > o and lo_d != wk.index[-1] and lo_d.weekday() <= 2:
         day = DAYS[lo_d.weekday()]
         return (f"Low of the week printed {day} ({wk['l'].min():,.0f}) and price is above the weekly open - "
-                f"fits the bullish '{day} low of the week' profile.")
+                f"fits the bullish '{day} low of the week' profile (pattern only - backtest: Tue/Wed weekly extremes are not more common than chance; Monday is).")
     if c < o and hi_d != wk.index[-1] and hi_d.weekday() <= 2:
         day = DAYS[hi_d.weekday()]
         return (f"High of the week printed {day} ({wk['h'].max():,.0f}) and price is below the weekly open - "
-                f"fits the bearish '{day} high of the week' profile.")
+                f"fits the bearish '{day} high of the week' profile (pattern only - backtest: Tue/Wed weekly extremes are not more common than chance; Monday is).")
     return "No clean weekly profile yet."
 
 

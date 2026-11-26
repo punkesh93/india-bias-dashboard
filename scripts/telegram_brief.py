@@ -95,7 +95,7 @@ def expiry_note():
 
 
 def main():
-    if not TOKEN or not CHAT:
+    if (not TOKEN or not CHAT) and not os.environ.get("DRY_RUN"):
         print("Telegram secrets not set - skipping.")
         return
     bias, story, ict = load("bias.json", {}) or {}, load("story.json", {}) or {}, load("ict.json", {}) or {}
@@ -112,6 +112,9 @@ def main():
               f'🔗 <a href="{SITE}">Full analysis dekho</a>',
               "<i>Sirf education ke liye · trading advice nahi</i>"]
     text = "\n".join(p for p in parts if p is not None)
+    if os.environ.get("DRY_RUN"):
+        print(text)
+        return
     data = urllib.parse.urlencode({"chat_id": CHAT, "text": text, "parse_mode": "HTML",
                                    "disable_web_page_preview": "true"}).encode()
     with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data=data, timeout=30) as r:
