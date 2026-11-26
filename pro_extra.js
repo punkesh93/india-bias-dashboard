@@ -95,12 +95,26 @@
     simple(key) {
       let html = "";
       const I = X.intra && X.intra.instruments && X.intra.instruments[key];
-      if (I) html += `<div class="s-card"><div class="s-h">Aaj ka session (15-min)</div><ul class="ticks">${I.today.story_hi.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-        <p class="hint">Kal ke liye: upar ${num(I.next.pdh)} (aaj ka high), neeche ${num(I.next.pdl)} (aaj ka low) — yahan stop-loss jama honge.</p></div>`;
+      if (I) {
+        const d = I.today;
+        const st = { "untouched": "touch nahi hua", "closed beyond": "break hua aur beyond close hua",
+                     "raided, closed back inside": "sweep hua par price wapas andar close hua (stop hunt)" };
+        const L = [
+          `${num(d.open)} pe open hua, ${num(d.close)} pe close hua — ${d.direction === "bullish" ? "Bullish" : "Bearish"} day.`,
+          `Day high ${num(d.high)} (${d.high_time}, ${d.high_zone}) · Day low ${num(d.low)} (${d.low_time}, ${d.low_zone}).`,
+          `Previous day high ${num(d.pdh)}: ${st[d.pdh_status] || d.pdh_status}.`,
+          `Previous day low ${num(d.pdl)}: ${st[d.pdl_status] || d.pdl_status}.`,
+        ];
+        if (d.judas === "bullish") L.push("Judas swing: morning ka dip fake tha (stop-loss hunt), real move upside tha.");
+        if (d.judas === "bearish") L.push("Judas swing: morning ki rally fake thi (stop-loss hunt), real move downside tha.");
+        html += `<div class="s-card"><div class="s-h">Today's session (15-min)</div><ul class="ticks">${L.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+          <p class="hint">Kal ke key levels: upar ${num(I.next.pdh)} (aaj ka high), neeche ${num(I.next.pdl)} (aaj ka low) — yahan liquidity (stop-losses) hai.</p></div>`;
+      }
       const T = X.bt && X.bt.instruments && (X.bt.instruments[key] || X.bt.instruments.SENSEX);
-      if (T && T.length) html += `<div class="s-card"><div class="s-h">Data ne kya sach nikala?</div><ul class="ticks">${T.map((t) =>
-        `<li class="${t.verdict === "Holds" ? "t-up" : t.verdict === "Weak" ? "t-warn" : "t-down"}"><b>${esc(t.title_hi)}</b> — ${esc(t.hi)}</li>`).join("")}</ul>
-        <p class="hint">Purane data pe test · aage bhi aisa hi ho, zaroori nahi.</p></div>`;
+      const VL = { "Holds": ["True ✓", "t-up"], "Weak": ["Partly true", "t-warn"], "Doesn't hold": ["Not true ✗", "t-down"] };
+      if (T && T.length) html += `<div class="s-card"><div class="s-h">Backtest: kya true nikla?</div><ul class="ticks">${T.map((t) => {
+        const v = VL[t.verdict] || ["–", ""]; return `<li class="${v[1]}"><b>${esc(t.title)}</b> — ${v[0]}</li>`; }).join("")}</ul>
+        <p class="hint">Past data pe test · future mein bhi same ho, guarantee nahi.</p></div>`;
       return html;
     },
   };
