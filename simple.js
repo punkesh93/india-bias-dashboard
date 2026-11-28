@@ -125,19 +125,14 @@
       <p class="hint">Isliye pehle ghante ka high/low mark karo — din ka ek extreme aksar wahi hota hai.</p></div>`;
   }
   function levelsCard(T) {
-    const want = ["Previous month high", "Previous week high", "This week high", "Previous day high", "40-day equilibrium",
-                  "Previous day low", "This week low", "Previous week low", "Previous month low"];
-    const L = (T.levels || []).filter((x) => want.includes(x.name));
-    const cur = `<div class="lvl-row cur"><span class="nm">Abhi (close)</span><b>${num(T.close, 2)}</b></div>`;
-    const rows = []; let placed = false;
-    L.forEach((x) => {
-      if (!placed && x.price < T.close) { rows.push(cur); placed = true; }
-      rows.push(`<div class="lvl-row"><span class="nm">${esc(x.name)}</span><span><b>${num(x.price)}</b><small>${pct(x.dist)}</small></span></div>`);
-    });
-    if (!placed) rows.push(cur);
-    const pt = T.pd_taken != null ? `Last ${T.sessions} sessions mein ${T.pd_taken}% din kal ka high ya low touch hua. ` : "";
-    return `<div class="s-card"><div class="s-h">Liquidity levels (stop-losses yahan rest karte hain)</div>${rows.join("")}
-      <p class="hint">${pt}Yeh levels sirf map hain — buy/sell signal nahi.</p></div>`;
+    const F = T.focus;
+    if (!F) return "";
+    const row = (x) => `<div class="lvl-row"><span class="nm">${esc(x.name)}${x.also ? ` <small>= ${esc(x.also.join(", "))}</small>` : ""}</span>
+      <span><b>${num(x.price)}</b><small>${pct(x.dist)}</small></span></div>
+      <div class="lvl-p"><span>Kal touch ~<b>${x.p1}%</b></span><span>5 din ~<b>${x.p5}%</b></span><span>20 din ~<b>${x.p20}%</b></span></div>`;
+    const cur = `<div class="lvl-row cur"><span class="nm">Abhi (close)</span><b>${num(F.close, 2)}</b></div>`;
+    return `<div class="s-card"><div class="s-h">Focus levels 🎯 (sirf yeh dekho)</div>${F.above.slice().reverse().map(row).join("")}${cur}${F.below.map(row).join("")}
+      <p class="hint">Upar aur neeche ke sabse paas wale untouched liquidity levels — jo level already toot chuka, woh hata diya. Touch chance sirf volatility se (typical daily range ${F.adr_pct}%, data since 2008) — direction ka prediction nahi. Jo level touch ho, wahan dekho: sweep + rejection = trap 🪤, beyond hold = continuation zyada common.</p></div>`;
   }
   function structureCard(T) {
     const s = T.structure || {};
@@ -149,16 +144,20 @@
       <p class="hint">Current period ka close vs previous period ka high/low. Sirf description — next move ka prediction nahi (tested).</p></div>`;
   }
   function bigCard(T) {
-    const s = S(), b = s.base, r = T.range3y || {};
-    const pos = Math.max(0, Math.min(100, r.pos || 0));
-    const zone = pos >= 75 ? "Premium zone (top 25%)" : pos >= 50 ? "upper half" : pos >= 25 ? "lower half" : "Discount zone (bottom 25%)";
-    const cell = (h) => `<div><b>${b[h].up}%</b><small>${h} months baad upar · avg ${b[h].avg > 0 ? "+" : ""}${b[h].avg}%</small></div>`;
-    return `<div class="s-card"><div class="s-h">Big picture (long term)</div>
-      <div class="base3">${cell("3")}${cell("6")}${cell("12")}</div>
-      <p class="hint">Sensex since ${b.since} ka base rate — long-term average, koi signal nahi.</p>
-      <div class="zbar" style="margin-top:12px"><i class="eq"></i><b class="mk" style="left:${pos}%"></b></div>
-      <div class="zlab"><span>${num(r.low)}</span><span>3-year range</span><span>${num(r.high)}</span></div>
-      <p class="body">Abhi ${esc(NAME[key])} apni 3-year range ke <b>${pos.toFixed(0)}%</b> pe hai — ${zone}. Yeh sirf position hai, prediction nahi.</p></div>`;
+    const F = T.focus, s = S(), b = s.base;
+    if (!F || !F.range1y) return "";
+    const r = F.range1y, pos = Math.max(0, Math.min(100, r.pos));
+    const where = pos >= 75 ? "range ke top ke paas" : pos >= 50 ? "upper half mein" : pos >= 25 ? "lower half mein" : "range ke bottom ke paas";
+    const near = r.to_high < -r.to_low ? "upar (1-year high)" : "neeche (1-year low)";
+    return `<div class="s-card"><div class="s-h">1-year range: iska matlab kya hai?</div>
+      <div class="zbar"><i class="eq"></i><b class="mk" style="left:${pos}%"></b></div>
+      <div class="zlab"><span>${num(r.low)}</span><span>${pos.toFixed(0)}%</span><span>${num(r.high)}</span></div>
+      <ul class="ticks">
+        <li><b>Upar:</b> 1-year high ${num(r.high)} sirf <b>${pct(r.to_high)}</b> door — 5 din mein touch ~${r.p_high5}%, 20 din mein ~${r.p_high20}%.</li>
+        <li><b>Neeche:</b> 1-year low ${num(r.low)} <b>${pct(r.to_low)}</b> door — 20 din mein touch ~${r.p_low20}%.</li>
+        <li><b>Aapke liye:</b> price ${where} hai, isliye paas wali badi liquidity ${near} hai. Range mein position khud buy/sell signal nahi (tested) — asli kaam us level pe price ka reaction dekhna hai.</li>
+      </ul>
+      <p class="hint">Long-term base: since ${b.since}, Sensex 12 months baad ${b["12"].up}% time upar.</p></div>`;
   }
   function posCard() {
     const rows = (D.poi && D.poi.rows) || []; if (rows.length < 21) return "";

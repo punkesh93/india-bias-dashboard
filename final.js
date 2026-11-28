@@ -59,33 +59,42 @@
   function renderLevels() {
     const box = $("#levels"); if (!box) return;
     if (!T) { box.innerHTML = ""; return; }
-    const k = keyNow(), I = T.instruments[k] || T.instruments.SENSEX, s = T.stats, b = s.base;
+    const k = keyNow(), I = T.instruments[k] || T.instruments.SENSEX, s = T.stats, b = s.base, F = I.focus;
+    const row = (x) => `<tr><td>${esc(x.name)}${x.also ? `<br><small class="muted">= ${esc(x.also.join(", "))}</small>` : ""}</td><td><b>${num(x.price)}</b></td><td>${pct(x.dist)}</td><td>${x.p1}%</td><td>${x.p5}%</td><td>${x.p20}%</td></tr>`;
+    const focusT = F ? `<div class="scroll"><table class="bt-t"><tr><th>Level</th><th>Price</th><th>Distance</th><th>Next day</th><th>5 days</th><th>20 days</th></tr>
+        ${F.above.slice().reverse().map(row).join("")}<tr class="cur-row"><td>Close</td><td><b>${num(F.close, 2)}</b></td><td colspan="4"></td></tr>${F.below.map(row).join("")}</table></div>
+        <p class="sub">Nearest untouched liquidity on each side (levels already traded through are removed; duplicates merged). Touch chances come only from volatility — typical daily range ${F.adr_pct}% (${num(F.adr)} pts), measured on this index since 2008. They describe reach, not direction. When price reaches a level, watch for sweep + rejection (trap) vs hold beyond.</p>`
+      : `<p class="muted">Not available.</p>`;
+    const r = F && F.range1y;
+    const near = r ? (r.to_high < -r.to_low ? "above — the 1-year high" : "below — the 1-year low") : "";
+    const rangeC = r ? `<div class="zbar"><i class="eq"></i><b class="mk" style="left:${Math.max(0, Math.min(100, r.pos))}%"></b></div>
+        <div class="zlab"><span>${num(r.low)}</span><span>${r.pos.toFixed(0)}% of 1-year range</span><span>${num(r.high)}</span></div>
+        <ul class="plain">
+          <li>1-year high ${num(r.high)} is <b>${pct(r.to_high)}</b> away: touched within 5 sessions ~${r.p_high5}%, within 20 sessions ~${r.p_high20}% (volatility-based).</li>
+          <li>1-year low ${num(r.low)} is <b>${pct(r.to_low)}</b> away: within 20 sessions ~${r.p_low20}%.</li>
+          <li><b>What it means:</b> the nearest major liquidity is ${near}. Range position alone did not predict direction in our tests — what matters is how price reacts when it reaches that level.</li>
+        </ul>
+        <p class="sub">Long-term base: Sensex higher 12 months later ${b["12"].up}% of the time since ${b.since}.</p>` : "";
     const st = I.structure || {};
     const SL = { above: ["Above prior high", "up"], below: ["Below prior low", "down"], inside: ["Inside prior range", "flat"] };
     const stRows = ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"].filter((x) => st[x]).map((x) => {
       const v = st[x], l = SL[v.state] || SL.inside;
       return `<tr><td>${x}</td><td>${num(v.close)}</td><td>${num(v.prev_high)}</td><td>${num(v.prev_low)}</td><td><span class="tag ${l[1]}">${l[0]}</span></td></tr>`;
     }).join("");
-    const lv = (I.levels || []).map((x) => `<tr><td>${esc(x.name)}</td><td>${num(x.price)}</td><td>${pct(x.dist)}</td></tr>`).join("");
     const fvg = I.fvg || { above: [], below: [] };
     const fv = (arr) => arr.map((x) => `<tr><td><span class="tag ${x.type === "bullish" ? "up" : "down"}">${x.type}</span></td><td>${num(x.low)}–${num(x.high)}</td><td>${esc(x.date)}</td><td>${x.touched ? "yes" : "no"}</td><td>${pct(x.dist)}</td></tr>`).join("");
-    const bar = (r, label) => { r = r || {}; const p = Math.max(0, Math.min(100, r.pos || 0));
-      return `<div class="row" style="margin-top:12px"><b>${label}</b><span class="sub">${num(r.low)} – ${num(r.high)} · now ${p.toFixed(0)}%</span></div><div class="zbar"><i class="eq"></i><b class="mk" style="left:${p}%"></b></div>`; };
-    const cell = (h) => `<div><b>${b[h].up}%</b><small>higher after ${h} months · avg ${b[h].avg > 0 ? "+" : ""}${b[h].avg}%</small></div>`;
-    box.innerHTML = `<div class="sec-head"><h2>Levels & structure · ${NAME[k]}</h2><p>Descriptive map: where liquidity rests, open fair value gaps, current structure and long-term context. None of this is a directional forecast.</p></div>
+    box.innerHTML = `<div class="sec-head"><h2>Focus & structure · ${NAME[k]}</h2><p>Only the levels that matter now: the nearest untouched liquidity on each side, how far it is, and how often price reaches that far.</p></div>
       <div class="ix-grid">
-        <div class="card"><h3>Liquidity levels</h3><div class="scroll"><table class="bt-t"><tr><th>Level</th><th>Price</th><th>Distance</th></tr>${lv}</table></div>
-          ${I.pd_taken != null ? `<p class="sub">Last ${I.sessions} sessions: the previous-day high or low was taken on ${I.pd_taken}% of days.</p>` : ""}</div>
-        <div class="card"><h3>Price structure</h3><div class="scroll"><table class="bt-t"><tr><th>Timeframe</th><th>Close</th><th>Prior high</th><th>Prior low</th><th>State</th></tr>${stRows}</table></div>
-          <p class="sub">Tested: weekly and monthly structure breaks did not predict the next period's direction. Shown as description only.</p></div>
+        <div class="card"><h3>Focus levels 🎯</h3>${focusT}</div>
+        <div class="card"><h3>1-year range — what it means</h3>${rangeC}</div>
       </div>
       <div class="ix-grid" style="margin-top:12px">
+        <div class="card"><h3>Price structure</h3><div class="scroll"><table class="bt-t"><tr><th>Timeframe</th><th>Close</th><th>Prior high</th><th>Prior low</th><th>State</th></tr>${stRows}</table></div>
+          <p class="sub">Description only — structure breaks did not predict the next period's direction in our tests.</p></div>
         <div class="card"><h3>Open daily FVGs</h3>${fvg.above.length || fvg.below.length
           ? `<div class="scroll"><table class="bt-t"><tr><th>Type</th><th>Zone</th><th>Formed</th><th>Touched</th><th>Distance</th></tr>${fv(fvg.above)}${fv(fvg.below)}</table></div>`
           : `<p class="muted">No open FVGs nearby.</p>`}
-          <p class="sub">Indian data (Nifty daily since 2008): ${s.fvg.fill20} of FVGs filled within 20 days, ${s.fvg.fill60} within 60 days. First touches showed no reliable support/resistance effect.</p></div>
-        <div class="card"><h3>Big picture</h3><div class="base3">${cell("3")}${cell("6")}${cell("12")}</div>
-          <p class="sub">Sensex base rate since ${b.since} — the long-term drift, not a signal.</p>${bar(I.range3y, "3-year range")}${bar(I.range12m, "12-month range")}</div>
+          <p class="sub">Nifty daily since 2008: ${s.fvg.fill20} of FVGs filled within 20 days, ${s.fvg.fill60} within 60. First touches showed no reliable support/resistance effect.</p></div>
       </div>`;
   }
 
@@ -100,10 +109,22 @@
     });
   }
 
+  function cleanPro() {
+    document.querySelectorAll("#view-pro section").forEach((sec) => {
+      const h = ((sec.querySelector("h2") || {}).textContent || "").toLowerCase();
+      if (/today.?s story|how to read|bias matrix|ict map/.test(h) || /^(story|bias|guide|ict)/i.test(sec.id || "")) sec.hidden = true;
+    });
+    const ps = document.querySelector(".psub");
+    if (!ps) return;
+    ps.querySelectorAll("a").forEach((a) => { const t = document.querySelector(a.getAttribute("href")); if (!t || t.hidden) a.remove(); });
+    ["#intraday", "#levels", "#trapwatch"].forEach((h) => { const a = ps.querySelector(`a[href="${h}"]`); if (a) ps.prepend(a); });
+    const lv = ps.querySelector('a[href="#levels"]'); if (lv) lv.textContent = "Focus";
+  }
+
   (async function () {
     T = await get("data/traps.json");
-    renderTrap(); renderLevels(); labelContext();
-    [800, 2500, 6000].forEach((t) => setTimeout(labelContext, t));
+    cleanPro(); renderTrap(); renderLevels(); labelContext();
+    [300, 1000, 2500, 6000].forEach((t) => setTimeout(() => { cleanPro(); labelContext(); }, t));
     document.addEventListener("click", (e) => { if (e.target.closest("#idxbar button")) setTimeout(() => { renderTrap(); renderLevels(); }, 0); });
   })();
 })();

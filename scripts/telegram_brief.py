@@ -1,4 +1,4 @@
-"""Evening Market Pulse brief: descriptive map + proven facts only."""
+"""Evening Market Pulse brief: focus levels, traps, range meaning. No buy/sell, no forecasts."""
 import json
 import os
 import re
@@ -43,45 +43,29 @@ def send(text):
     print("Telegram:", "sent" if res.get("ok") else res)
 
 
-ST = {"above": "above prior high", "below": "below prior low", "inside": "inside"}
-
-
-def lv(K, name):
-    for x in K.get("levels", []):
-        if x["name"] == name:
-            return inr(x["price"])
-    return "-"
-
-
 def daily_line(d, S):
     if not d or d.get("kind") in (None, "pending"):
         return None
     side = "high" if d.get("side") == "PDH" else "low"
     k = d["kind"]
     if k == "rejection":
-        res = "range ke andar close ✓" if d.get("back_inside") else "beyond close ✗"
-        return f"🪤 Daily trap: pehle ghante ne kal ka {side} {inr(d['level'])} sweep karke wapas andar close kiya → aaj {res} (historically {S['daily_rej']})"
+        return f"🪤 Aaj daily trap: kal ka {side} {inr(d['level'])} sweep + rejection → din {'range ke andar close ✓' if d.get('back_inside') else 'beyond close ✗'} (historically {S['daily_rej']})"
     if k == "held":
-        res = "wapas andar close" if d.get("back_inside") else "beyond close"
-        return f"🚀 Opening breakout hold: kal ka {side} {inr(d['level'])} toot ke hold hua (trap nahi) → aaj {res}"
+        return f"🚀 Aaj opening breakout hold: kal ka {side} {inr(d['level'])} toot ke hold hua (trap nahi)"
     if k == "both":
-        return "↔️ Outside opening: pehle ghante ne kal ka high aur low dono tode"
-    return "Daily: koi opening trap nahi (pehla ghanta kal ki range ke andar raha)"
+        return "↔️ Aaj outside opening (kal ka high aur low dono toote)"
+    return None
 
 
 def weekly_line(w, S):
-    if not w or w.get("kind") in (None, "pending"):
+    if not w or w.get("kind") in (None, "pending", "inside"):
         return None
     side = "high" if w.get("side") == "PWH" else "low"
-    k = w["kind"]
-    if k == "rejection":
-        now = "andar" if w.get("back_inside") else "bahar"
-        return f"🪤 Weekly trap active: week ke pehle din ne last week ka {side} {inr(w['level'])} sweep karke wapas close kiya → historically {S['weekly_rej']} week range ke andar close (abhi price range ke {now})"
-    if k == "held":
-        return f"🚀 Weekly breakout hold: last week ka {side} {inr(w['level'])} toot ke hold hua (trap nahi; historically sirf {S['weekly_brk']} wapas andar)"
-    if k == "both":
-        return "↔️ Week ke pehle din ne last week ka high aur low dono tode"
-    return "Weekly: koi trap nahi (week ka pehla din last week ki range ke andar)"
+    if w["kind"] == "rejection":
+        return f"🪤 Weekly trap active: last week ka {side} {inr(w['level'])} sweep + rejection → historically {S['weekly_rej']} week range ke andar close (abhi price range ke {'andar' if w.get('back_inside') else 'bahar'})"
+    if w["kind"] == "held":
+        return f"🚀 Weekly breakout hold: last week ka {side} {inr(w['level'])} toot ke hold hua (trap nahi)"
+    return None
 
 
 def px(prices, key):
@@ -89,6 +73,17 @@ def px(prices, key):
     if len(rows) < 2:
         return None, None
     return rows[-1]["c"], (rows[-1]["c"] / rows[-2]["c"] - 1) * 100
+
+
+def focus_line(F, short=False):
+    a = ((F or {}).get("above") or [None])[0]
+    b = ((F or {}).get("below") or [None])[0]
+    seg = []
+    if a:
+        seg.append(f"upar {inr(a['price'])}" + ("" if short else f" {a['name']} ({a['dist']:+.1f}%, kal touch ~{a['p1']}%)"))
+    if b:
+        seg.append(f"neeche {inr(b['price'])}" + ("" if short else f" {b['name']} ({b['dist']:+.1f}%, kal touch ~{b['p1']}%)"))
+    return " · ".join(seg)
 
 
 def main():
@@ -102,26 +97,26 @@ def main():
         c, chg = px(prices, "SENSEX")
         if c:
             parts.append(f"<b>Sensex</b> {inr(c, 2)} ({chg:+.2f}%)")
-        st = K.get("structure", {})
-        parts.append("Structure: " + " · ".join(f"{k} {ST[v['state']]}" for k, v in st.items() if k in ("Daily", "Weekly", "Monthly")))
-        parts.append(f"🗺️ Kal ke key levels: aaj ka high {lv(K, 'Today high')} · aaj ka low {lv(K, 'Today low')} · week high {lv(K, 'This week high')} · week low {lv(K, 'This week low')}")
+        F = K.get("focus") or {}
+        fl = focus_line(F)
+        if fl:
+            parts.append(f"🎯 Focus: {fl}")
         for line in (daily_line(K.get("daily"), S), weekly_line(K.get("weekly"), S)):
             if line:
                 parts.append(line)
-        parts.append(f"⏱️ Kal 9:15–10:15 pe dhyan: ~{S.get('first_hour', '78%')} din, din ka high ya low pehle ghante mein banta hai.")
-        b, r3 = S.get("base", {}), K.get("range3y", {})
-        pos = r3.get("pos", 50)
-        zone = "Premium zone" if pos >= 75 else "upper half" if pos >= 50 else "lower half" if pos >= 25 else "Discount zone"
-        if b.get("12"):
-            parts.append(f"🔭 Big picture: since {b['since']}, 12 months baad Sensex {b['12']['up']}% time upar (avg {b['12']['avg']:+.1f}%). Abhi price 3-year range ke {pos:.0f}% pe ({zone}) — sirf position, prediction nahi.")
+        parts.append(f"⏱️ Kal 9:15–10:15: ~{S.get('first_hour', '78%')} din, din ka high ya low pehle ghante mein banta hai.")
+        r = F.get("range1y")
+        if r:
+            near = "upar (1-year high)" if r["to_high"] < -r["to_low"] else "neeche (1-year low)"
+            parts.append(f"📏 1-year range ka {r['pos']:.0f}%: 1-year high {inr(r['high'])} sirf {r['to_high']:+.1f}% door (20 din mein touch ~{r['p_high20']}%). Paas wali badi liquidity {near} — wahan price ka reaction dekho, position khud signal nahi.")
     parts.append("")
-    LAB = {"rejection": "daily trap 🪤", "held": "breakout hold 🚀", "both": "outside opening", "inside": "no trap"}
+    LAB = {"rejection": "trap 🪤", "held": "breakout hold 🚀", "both": "outside opening", "inside": "no trap"}
     for key in ("NIFTY", "BANKNIFTY"):
         K2 = I.get(key)
         c, chg = px(prices, key)
         if K2 and c:
             d = K2.get("daily") or {}
-            parts.append(f"<b>{NAMES[key]}</b> {inr(c, 2)} ({chg:+.2f}%) · {LAB.get(d.get('kind'), '-')}")
+            parts.append(f"<b>{NAMES[key]}</b> {inr(c, 2)} ({chg:+.2f}%) · {LAB.get(d.get('kind'), '-')} · focus {focus_line(K2.get('focus'), short=True)}")
     parts += ["", f'🔗 <a href="{SITE}">Full market map dekho</a>', "<i>Sirf education · koi buy/sell advice ya prediction nahi</i>"]
     send("\n".join(parts))
 

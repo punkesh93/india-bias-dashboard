@@ -7,6 +7,7 @@ import pandas as pd
 
 from backtest import daily
 from common import load, now_ist, save
+import focus as FOC
 
 KEYS = ["SENSEX", "NIFTY", "BANKNIFTY"]
 TICK = {"SENSEX": "^BSESN", "NIFTY": "^NSEI"}
@@ -229,6 +230,7 @@ def main():
            "stats": {"first_hour": fh, "daily_rej": dr, "daily_brk": db, "weekly_rej": ws["rej"], "weekly_brk": ws["brk"],
                      "base": base, "fvg": {"fill5": f5, "fill20": f20, "fill60": f60}},
            "instruments": {}}
+    tables = FOC.tables()
     for key in KEYS:
         df = frame(key)
         if df is None:
@@ -239,7 +241,8 @@ def main():
             "close": round(float(df.c.iloc[-1]), 2), "asof": df.index[-1].strftime("%Y-%m-%d"),
             "structure": structure(df), "levels": levels(df), "range3y": rng(df, 756), "range12m": rng(df, 252),
             "fvg": open_fvgs(df), "daily": daily_trap(I, df) if I else None, "weekly": weekly_trap(df),
-            "pd_taken": st.get("pd_level_taken"), "sessions": st.get("sessions")}
+            "pd_taken": st.get("pd_level_taken"), "sessions": st.get("sessions"),
+            "focus": FOC.focus(df, tables.get(key))}
         x = out["instruments"][key]
         print(f"{key:9} daily={(x['daily'] or {}).get('kind')}  weekly={(x['weekly'] or {}).get('kind')}  3y range {x['range3y']['pos']}%")
     log = load("trap_log.json", {}) or {}
