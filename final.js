@@ -117,13 +117,39 @@
     const ps = document.querySelector(".psub");
     if (!ps) return;
     ps.querySelectorAll("a").forEach((a) => { const t = document.querySelector(a.getAttribute("href")); if (!t || t.hidden) a.remove(); });
-    ["#intraday", "#levels", "#trapwatch"].forEach((h) => { const a = ps.querySelector(`a[href="${h}"]`); if (a) ps.prepend(a); });
+    ["#ctx", "#backtest", "#intraday", "#levels", "#trapwatch"].forEach((h) => { const a = ps.querySelector(`a[href="${h}"]`); if (a) ps.prepend(a); });
     const lv = ps.querySelector('a[href="#levels"]'); if (lv) lv.textContent = "Focus";
+  }
+
+  function reorderPro() {
+    const tw = $("#trapwatch");
+    if (!tw || $("#ctx")) return;
+    const parent = tw.parentNode;
+    const first = parent.querySelector(":scope > section:not([hidden])");
+    ["#trapwatch", "#levels", "#intraday", "#backtest"].forEach((id) => { const s = $(id); if (s && first && s !== first) parent.insertBefore(s, first); });
+    const keep = ["trapwatch", "levels", "intraday", "backtest"];
+    const ctx = Array.from(parent.querySelectorAll(":scope > section")).filter((s) => !s.hidden && !keep.includes(s.id));
+    if (!ctx.length) return;
+    const d = document.createElement("details");
+    d.id = "ctx"; d.className = "ctx-wrap";
+    d.innerHTML = "<summary>Context (not predictive) — Global money flow, FII vs Retail, Price map</summary>";
+    parent.appendChild(d);
+    ctx.forEach((s) => d.appendChild(s));
+    d.addEventListener("toggle", () => setTimeout(() => window.dispatchEvent(new Event("resize")), 60));
+    const ps = document.querySelector(".psub");
+    if (ps) {
+      ctx.forEach((s) => { const a = ps.querySelector(`a[href="#${s.id}"]`); if (a) a.remove(); });
+      if (!ps.querySelector('a[href="#ctx"]')) {
+        const a = document.createElement("a"); a.href = "#ctx"; a.textContent = "Context";
+        a.addEventListener("click", () => { d.open = true; });
+        ps.appendChild(a);
+      }
+    }
   }
 
   (async function () {
     T = await get("data/traps.json");
-    cleanPro(); renderTrap(); renderLevels(); labelContext();
+    cleanPro(); reorderPro(); renderTrap(); renderLevels(); labelContext();
     [300, 1000, 2500, 6000].forEach((t) => setTimeout(() => { cleanPro(); labelContext(); }, t));
     document.addEventListener("click", (e) => { if (e.target.closest("#idxbar button")) setTimeout(() => { renderTrap(); renderLevels(); }, 0); });
   })();

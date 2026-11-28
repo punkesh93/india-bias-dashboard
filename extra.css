@@ -49,3 +49,9 @@ section[hidden] { display: none !important; }
 .cur-row td { color: #a5b4fc; border-top: 1px dashed rgba(139,156,255,.55) !important; border-bottom: 1px dashed rgba(139,156,255,.55) !important; }
 ul.plain { margin: 10px 0 0; padding-left: 18px; color: var(--soft); font-size: 13.5px; }
 ul.plain li { margin: 6px 0; }
+
+
+/* v10.1 context fold */
+.ctx-wrap { margin-top: 22px; border: 1px solid var(--line); border-radius: 14px; padding: 2px 14px 14px; background: rgba(255,255,255,.015); }
+.ctx-wrap > summary { cursor: pointer; padding: 12px 0; color: var(--soft); font-weight: 600; font-size: 14px; }
+.ctx-wrap[open] > summary { margin-bottom: 6px; }
