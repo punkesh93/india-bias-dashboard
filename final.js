@@ -24,6 +24,13 @@
     const out = d.complete && d.side ? `<p class="sub">Outcome: the session closed ${d.back_inside ? "back inside" : "beyond"} the level.</p>` : "";
     return `<span class="trap-k ${k[1]}">${k[0]}</span>${lv}<p class="body">${p}</p>${out}`;
   }
+  function weekDone(ws) {
+    if (!ws) return false;
+    const d = new Date(ws + "T00:00:00Z"), dow = d.getUTCDay() || 7;
+    const fri = new Date(d.getTime() + (5 - dow) * 864e5).toISOString().slice(0, 10);
+    const now = new Date(Date.now() + 330 * 60000), today = now.toISOString().slice(0, 10);
+    return today > fri || (today === fri && now.getUTCHours() >= 16);
+  }
   function weeklyText(w, s) {
     if (!w) return `<p class="muted">No weekly data.</p>`;
     const side = w.side === "PWH" ? "high" : "low", k = KL[w.kind] || KL.inside;
@@ -33,7 +40,9 @@
     else if (w.kind === "held") p = `The first day broke last week's ${side} (${num(w.level)}) and held beyond. Historically the week closed back inside only ${s.weekly_brk} of the time.`;
     else if (w.kind === "both") p = "The first day traded beyond both last week's high and low.";
     else p = "The first day stayed inside last week's range — no weekly sweep.";
-    const now = w.back_inside == null ? "" : `<p class="sub">Now: price is ${w.back_inside ? "back inside" : "beyond"} the level (close ${num(w.close)}).</p>`;
+    const now = w.back_inside == null ? "" : weekDone(w.week_start)
+      ? `<p class="sub"><b>Outcome:</b> the week closed ${w.back_inside ? "back inside ✓ (trap played out)" : "beyond ✗ (trap failed)"} at ${num(w.close)}.</p>`
+      : `<p class="sub">Now: price is ${w.back_inside ? "back inside" : "beyond"} the level (close ${num(w.close)}).</p>`;
     return `<span class="trap-k ${k[1]}">${k[0]}</span><div class="ohlc"><span>Last week high <b>${num(w.pwh)}</b></span><span>low <b>${num(w.pwl)}</b></span></div><p class="body">${p}</p>${now}`;
   }
 

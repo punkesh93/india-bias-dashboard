@@ -100,11 +100,20 @@
     if (d.kind === "both") return "Pehle ghante ne kal ka high aur low dono tode — outside opening.";
     return `Pehla ghanta kal ki range (${num(d.pdl)} – ${num(d.pdh)}) ke andar raha — aaj koi opening trap nahi.`;
   }
+  function weekDone(ws) {
+    if (!ws) return false;
+    const d = new Date(ws + "T00:00:00Z"), dow = d.getUTCDay() || 7;
+    const fri = new Date(d.getTime() + (5 - dow) * 864e5).toISOString().slice(0, 10);
+    const now = new Date(Date.now() + 330 * 60000), today = now.toISOString().slice(0, 10);
+    return today > fri || (today === fri && now.getUTCHours() >= 16);
+  }
   function trapWeeklyHi(w) {
     const s = S();
     if (!w) return "Weekly data abhi available nahi.";
     const side = w.side === "PWH" ? "high" : "low";
-    const now = w.back_inside == null ? "" : ` Abhi price ${w.back_inside ? "range ke andar" : "range ke bahar"} hai.`;
+    const now = w.back_inside == null ? "" : weekDone(w.week_start)
+      ? ` Week ka result: ${w.back_inside ? "range ke andar close ✓ (trap sahi nikla)" : "beyond close ✗ (trap fail)"}.`
+      : ` Abhi price ${w.back_inside ? "range ke andar" : "range ke bahar"} hai.`;
     if (w.kind === "pending") return `Week ka pehla din abhi complete nahi hua. Last week: high ${num(w.pwh)} · low ${num(w.pwl)}.`;
     if (w.kind === "rejection") return `<b>Weekly trap active 🪤</b> — week ke pehle din ne last week ka ${side} (${num(w.level)}) sweep karke wapas andar close kiya. Data (since 2008): aise hafton mein <b>${s.weekly_rej}</b> baar week range ke andar close hua (hold hone par ${s.weekly_brk}).${now}`;
     if (w.kind === "held") return `<b>Weekly breakout hold 🚀</b> — last week ka ${side} (${num(w.level)}) toot ke hold hua. Trap nahi. Data: aise hafton mein sirf ${s.weekly_brk} baar wapas andar close.${now}`;
